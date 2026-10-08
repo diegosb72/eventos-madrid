@@ -7,7 +7,7 @@
     
     <!-- PWA -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="EventosMadrid">
@@ -40,7 +40,7 @@
     <!-- i18n (debe cargarse primero) -->
     <script type="module" src="js/i18n.js"></script>
 </head>
-<body>
+<body class="view-map">
 
 <!-- ===== SKIP LINK (ACCESIBILIDAD) ===== -->
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
@@ -58,97 +58,72 @@
     </div>
 </div>
 
-<!-- ===== HEADER (BLUR GLASS APPLE-STYLE) ===== -->
+<!-- ===== BARRA PRINCIPAL ===== -->
 <header class="top-bar" role="banner">
-    <div class="logo">
-        <span class="logo-icon">🎉</span>
-        <span class="logo-text" data-i18n="logo.text">EventosMadrid</span>
+    <div class="brand-group">
+        <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Abrir filtros y opciones" aria-expanded="false">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <div class="logo" aria-label="EventosMadrid">
+            <span class="logo-icon" aria-hidden="true"><i class="fas fa-location-dot"></i></span>
+            <span class="logo-text" data-i18n="logo.text">EventosMadrid</span>
+        </div>
     </div>
 
-    <nav class="view-toggle" 
-         role="tablist" 
-         aria-label="Cambiar vista">
-        <button class="view-btn active" 
-                id="view-map-btn"
-                role="tab"
-                aria-selected="true"
-                aria-controls="map"
-                data-view="map"
-                aria-label="Vista de mapa">
-            <i class="fas fa-map" aria-hidden="true"></i>
-            <span data-i18n="btn.map">Mapa</span>
+    <div class="map-search" role="search">
+        <i class="fas fa-magnifying-glass search-leading-icon" aria-hidden="true"></i>
+        <input type="search"
+               id="search"
+               class="search-box"
+               placeholder="Busca eventos, lugares y zonas"
+               data-i18n-placeholder="filters.search.placeholder"
+               aria-label="Buscar eventos y lugares"
+               autocomplete="off"
+               spellcheck="false">
+        <button class="search-clear" id="clear-search" type="button" aria-label="Borrar búsqueda" title="Borrar búsqueda">
+            <i class="fas fa-times" aria-hidden="true"></i>
         </button>
-        <button class="view-btn" 
-                id="view-list-btn"
-                role="tab"
-                aria-selected="false"
-                aria-controls="list-view"
-                data-view="list"
-                aria-label="Vista de lista">
-            <i class="fas fa-list" aria-hidden="true"></i>
-            <span data-i18n="btn.list">Lista</span>
+        <span class="search-divider" aria-hidden="true"></span>
+        <button class="search-submit" id="search-submit" type="button" aria-label="Buscar">
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
         </button>
-        <button class="view-btn" 
-                id="view-calendar-btn"
-                role="tab"
-                aria-selected="false"
-                aria-controls="calendar-view"
-                data-view="calendar"
-                aria-label="Vista de calendario">
-            <i class="fas fa-calendar-alt" aria-hidden="true"></i>
-            <span data-i18n="btn.calendar">Calendario</span>
+    </div>
+
+    <nav class="view-toggle" role="tablist" aria-label="Cambiar vista">
+        <button class="view-btn active" id="view-map-btn" role="tab" aria-selected="true" aria-controls="map" data-view="map" aria-label="Vista de mapa">
+            <i class="fas fa-map" aria-hidden="true"></i><span data-i18n="btn.map">Mapa</span>
+        </button>
+        <button class="view-btn" id="view-list-btn" role="tab" aria-selected="false" aria-controls="list-view" data-view="list" aria-label="Vista de lista">
+            <i class="fas fa-list" aria-hidden="true"></i><span data-i18n="btn.list">Lista</span>
+        </button>
+        <button class="view-btn" id="view-calendar-btn" role="tab" aria-selected="false" aria-controls="calendar-view" data-view="calendar" aria-label="Vista de calendario">
+            <i class="fas fa-calendar-alt" aria-hidden="true"></i><span data-i18n="btn.calendar">Calendario</span>
         </button>
     </nav>
 
     <div class="top-bar-actions">
-        <!-- Badge HOY -->
-        <button class="hoy-badge" id="hoy-badge" style="display:none" aria-label="Eventos hoy">
+        <button class="hoy-badge" id="hoy-badge" style="display:none" aria-label="Eventos hoy" title="Eventos hoy">
             <span class="hoy-badge-dot" aria-hidden="true"></span>
             <span id="hoy-badge-count">0</span>
             <span class="desktop-only" data-i18n="badge.today">hoy</span>
         </button>
-
-        <!-- Toggle Lugares -->
-        <button class="btn-lugares active" id="btn-toggle-lugares" 
-                aria-label="Mostrar lugares de interés" 
-                aria-pressed="true">
-            <i class="fas fa-landmark" aria-hidden="true"></i>
-            <span class="desktop-only" data-i18n="btn.places">Lugares</span>
+        <button class="btn-lugares active" id="btn-toggle-lugares" aria-label="Mostrar lugares de interés" aria-pressed="true" title="Lugares de interés">
+            <i class="fas fa-landmark" aria-hidden="true"></i><span class="desktop-only" data-i18n="btn.places">Lugares</span>
         </button>
-
-        <!-- Favoritos -->
-        <button class="favorites-toggle" id="favorites-toggle" 
-                aria-label="Abrir favoritos">
-            <i class="fas fa-heart" aria-hidden="true"></i>
-            <span class="favorites-count" id="favorites-count" style="display:none;">0</span>
+        <button class="favorites-toggle" id="favorites-toggle" aria-label="Abrir favoritos" title="Favoritos">
+            <i class="fas fa-heart" aria-hidden="true"></i><span class="favorites-count" id="favorites-count" style="display:none;">0</span>
         </button>
-
-        <!-- Stats -->
-        <button class="stats-toggle" id="stats-toggle" 
-                aria-label="Abrir estadísticas">
-            <i class="fas fa-chart-bar" aria-hidden="true"></i>
-            <span class="desktop-only" data-i18n="btn.stats">Stats</span>
+        <button class="stats-toggle" id="stats-toggle" aria-label="Abrir estadísticas" title="Estadísticas">
+            <i class="fas fa-chart-bar" aria-hidden="true"></i><span class="desktop-only" data-i18n="btn.stats">Stats</span>
         </button>
-
-        <!-- Planificador de Rutas -->
-        <button class="route-planner-btn" id="route-planner-btn" 
-                aria-label="Planificador de rutas"
-                title="Planificador de rutas">
-            <i class="fas fa-route" aria-hidden="true"></i>
-            <span class="desktop-only" data-i18n="btn.routes">Rutas</span>
+        <button class="route-planner-btn" id="route-planner-btn" aria-label="Planificador de rutas" title="Planificador de rutas">
+            <i class="fas fa-route" aria-hidden="true"></i><span class="desktop-only" data-i18n="btn.routes">Rutas</span>
             <span class="route-count" id="route-count" style="display:none;">0</span>
         </button>
-        <!-- Settings -->
-        <button class="settings-toggle" id="settings-toggle" 
-                aria-label="Abrir ajustes">
+        <button class="settings-toggle" id="settings-toggle" aria-label="Abrir ajustes" title="Ajustes">
             <i class="fas fa-cog" aria-hidden="true"></i>
         </button>
-
-        <!-- Contador total de eventos -->
-        <div class="event-counter" 
-             id="event-count" 
-             aria-live="polite" 
-             aria-label="Total de eventos">0</div>
+        <div class="event-counter" id="event-count" aria-live="polite" aria-label="Total de eventos">0</div>
     </div>
 </header>
 
@@ -200,6 +175,34 @@
          class="view-container active" 
          role="application" 
          aria-label="Mapa interactivo de eventos"></div>
+    <div class="mobile-map-credit">Mapa: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap contributors</a></div>
+
+    <!-- Panel de resultados integrado en el mapa -->
+    <aside class="map-results-panel" id="map-results-panel" aria-label="Eventos en el mapa">
+        <div class="map-results-topbar">
+            <span class="map-results-kicker"><i class="fas fa-compass" aria-hidden="true"></i> EXPLORA MADRID</span>
+            <button class="map-results-collapse" id="map-results-collapse" type="button" aria-label="Contraer resultados" aria-expanded="true" title="Contraer panel">
+                <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="map-results-content" id="map-results-content">
+            <div class="map-results-heading">
+                <div class="map-results-title-row">
+                    <h1 data-i18n="list.title">Eventos en Madrid</h1>
+                    <span class="map-results-live"><span></span> MADRID</span>
+                </div>
+                <p data-i18n="settings.about.desc">Mapa de eventos culturales y de ocio en Madrid</p>
+                <div class="map-results-summary">
+                    <span id="map-results-count" aria-live="polite">Cargando eventos</span>
+                    <span class="map-results-area"><i class="fas fa-location-dot" aria-hidden="true"></i> Madrid</span>
+                </div>
+            </div>
+            <div class="map-results-list" id="map-results-list" role="list" aria-label="Resultados de eventos"></div>
+            <button class="map-results-all" type="button" data-view="list">
+                <span data-i18n="btn.list">Lista</span> <i class="fas fa-arrow-right" aria-hidden="true"></i>
+            </button>
+        </div>
+    </aside>
 
     <!-- ===== VISTA LISTA ===== -->
     <div id="list-view" 
@@ -395,18 +398,6 @@
     </div>
 
     <div class="panel-content">
-        <!-- Búsqueda -->
-        <div class="filter-section">
-            <input type="text" 
-                   id="search" 
-                   class="search-box" 
-                   placeholder="Buscar eventos, lugares..."
-                   data-i18n-placeholder="filters.search.placeholder"
-                   aria-label="Buscar eventos"
-                   autocomplete="off"
-                   spellcheck="false">
-        </div>
-
         <!-- Grupo: Filtros de Eventos -->
         <div class="filter-group">
             <button class="filter-group-header" 

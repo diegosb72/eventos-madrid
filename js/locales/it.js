@@ -8,7 +8,7 @@ export default {
         'btn.routes': 'Percorsi',
         
         'filters.title': '🔍 Filtri',
-        'filters.search.placeholder': '🔍 Cerca eventi, luoghi...',
+        'filters.search.placeholder': 'Cerca eventi, luoghi...',
         'filters.search.aria': 'Cerca eventi',
         
         'filters.events': '🎭 Filtri Eventi',

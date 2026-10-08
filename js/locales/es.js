@@ -10,7 +10,7 @@ export default {
         
         // ===== FILTROS =====
         'filters.title': '🔍 Filtros',
-        'filters.search.placeholder': '🔍 Buscar eventos, lugares...',
+        'filters.search.placeholder': 'Buscar eventos, lugares...',
         'filters.search.aria': 'Buscar eventos',
         
         'filters.events': '🎭 Filtros de Eventos',

@@ -8,7 +8,7 @@ export default {
         'btn.routes': 'ルート',
         
         'filters.title': '🔍 フィルター',
-        'filters.search.placeholder': '🔍 イベント、場所を検索...',
+        'filters.search.placeholder': 'イベント、場所を検索...',
         'filters.search.aria': 'イベントを検索',
         
         'filters.events': '🎭 イベントフィルター',

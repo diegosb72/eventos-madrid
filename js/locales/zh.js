@@ -8,7 +8,7 @@ export default {
         'btn.routes': '路线',
         
         'filters.title': '🔍 筛选',
-        'filters.search.placeholder': '🔍 搜索活动、地点...',
+        'filters.search.placeholder': '搜索活动、地点...',
         'filters.search.aria': '搜索活动',
         
         'filters.events': '🎭 活动筛选',

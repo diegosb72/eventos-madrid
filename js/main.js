@@ -106,8 +106,19 @@ function toggleFavorite(eventoId) {
     saveFavorites();
     renderFavoritesList();
 
+    const isNowFavorite = favorites.includes(eventoId);
     document.querySelectorAll(`[data-event-id="${eventoId}"]`).forEach(btn => {
-        btn.classList.toggle('active', favorites.includes(eventoId));
+        btn.classList.toggle('active', isNowFavorite);
+        const heartIcon = btn.querySelector('.fa-heart');
+        if (heartIcon) {
+            heartIcon.classList.toggle('fas', isNowFavorite);
+            heartIcon.classList.toggle('far', !isNowFavorite);
+        }
+        if (btn.classList.contains('map-event-favorite')) {
+            const label = isNowFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos';
+            btn.setAttribute('aria-label', label);
+            btn.title = label;
+        }
     });
 
     mostrarToastConUndo(
@@ -618,10 +629,12 @@ function procesarUrlEvento() {
 
 // ===== INICIALIZACIÓN DEL MAPA =====
 function initMap() {
-    map = L.map('map').setView([40.4168, -3.7038], 12);
+    map = L.map('map', { zoomControl: false }).setView([40.4168, -3.7038], 12);
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19
     }).addTo(map);
 
     markersLayer = L.markerClusterGroup({
@@ -671,6 +684,7 @@ async function loadEvents() {
         procesarUrlEvento();
 
         loadFavorites();
+        renderMapResults(currentFilteredEvents);
         renderFavoritesList();
 
         if (currentView === 'calendar') {
@@ -712,7 +726,6 @@ function displayEvents(events) {
                     border: 3px solid white;
                     box-shadow: 0 3px 10px rgba(0,0,0,0.3);
                     cursor: pointer;
-                    transform: translate(-50%, -50%);
                 ">${emoji}</div>
             `,
             className: '',
@@ -787,6 +800,7 @@ function displayEvents(events) {
     });
 
     currentFilteredEvents = events;
+    renderMapResults(events);
 
     if (currentView === 'list') {
         renderListView(events);
@@ -796,6 +810,77 @@ function displayEvents(events) {
 
     actualizarEstadisticas(events);
     initCharts();
+}
+
+// ===== RESULTADOS VISIBLES EN EL PANEL DEL MAPA =====
+function renderMapResults(events) {
+    const list = document.getElementById('map-results-list');
+    const count = document.getElementById('map-results-count');
+    if (!list || !count) return;
+
+    const singular = i18n.t('calendar.event');
+    const plural = i18n.t('calendar.events');
+    count.textContent = `${events.length} ${events.length === 1 ? singular : plural}`;
+
+    if (!events.length) {
+        list.innerHTML = `
+            <div class="map-results-empty">
+                <i class="fas fa-map-location-dot" aria-hidden="true"></i>
+                <h3>${i18n.t('list.empty.title')}</h3>
+                <p>${i18n.t('list.empty.description')}</p>
+            </div>
+        `;
+        return;
+    }
+
+    const typeKeys = {
+        concierto: 'filters.type.concerts',
+        fiesta: 'filters.type.parties',
+        mercado: 'filters.type.markets',
+        cultural: 'filters.type.cultural',
+        gastronomia: 'filters.type.gastro',
+        deporte: 'filters.type.sports',
+        infantil: 'filters.type.kids'
+    };
+
+    list.innerHTML = [...events]
+        .sort((a, b) => new Date(a.fecha) - new Date(b.fecha))
+        .slice(0, 12)
+        .map(evento => {
+            const eventoId = Number(evento.id);
+            const color = colors[evento.tipo] || '#5f6368';
+            const emoji = icons[evento.tipo] || '📍';
+            const tipo = DOMPurify.sanitize(i18n.t(typeKeys[evento.tipo] || 'filters.events'));
+            const nombre = DOMPurify.sanitize(evento.nombre || 'Evento en Madrid');
+            const lugar = DOMPurify.sanitize(evento.lugar || getZonaEvento(evento));
+            const zona = DOMPurify.sanitize(i18n.t('zone.' + getZonaEvento(evento), getZonaEvento(evento)));
+            const fecha = DOMPurify.sanitize(formatearFechaSafe(evento.fecha, evento.fecha_fin));
+            const precio = evento.precio === 'gratis'
+                ? i18n.t('badge.free')
+                : (evento.precio_desde || i18n.t('badge.paid'));
+            const precioSeguro = DOMPurify.sanitize(precio);
+            const favorito = isFavorite(evento.id);
+
+            return `
+                <article class="map-event-card" role="listitem" style="--event-color:${color};">
+                    <button class="map-event-main" type="button" onclick="verEnMapa(${eventoId})" aria-label="Ver evento ${eventoId} en el mapa">
+                        <span class="map-event-art" aria-hidden="true">
+                            <span class="map-event-emoji">${emoji}</span>
+                            <span class="map-event-art-label">${tipo}</span>
+                        </span>
+                        <span class="map-event-copy">
+                            <span class="map-event-meta-top"><span class="map-event-type">${tipo}</span><span class="map-event-price">${precioSeguro}</span></span>
+                            <span class="map-event-title">${nombre}</span>
+                            <span class="map-event-place"><i class="fas fa-location-dot" aria-hidden="true"></i><span>${lugar} · ${zona}</span></span>
+                            <span class="map-event-date"><i class="far fa-calendar" aria-hidden="true"></i><span>${fecha}</span></span>
+                        </span>
+                    </button>
+                    <button class="map-event-favorite ${favorito ? 'active' : ''}" type="button" data-event-id="${eventoId}" onclick="toggleFavorite(${eventoId})" aria-label="${favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'}" title="${favorito ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+                        <i class="${favorito ? 'fas' : 'far'} fa-heart" aria-hidden="true"></i>
+                    </button>
+                </article>
+            `;
+        }).join('');
 }
 
 // ===== DISPLAY LUGARES =====
@@ -2488,7 +2573,7 @@ function initSettingsPanel() {
 
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
         themeToggle.checked = (savedTheme === 'dark');
 
@@ -3429,7 +3514,7 @@ function initPremiumFeatures() {
 
 // ===== INICIALIZACIÓN PRINCIPAL =====
 document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     const savedContrast = localStorage.getItem('contrast') || 'normal';
@@ -3457,26 +3542,42 @@ document.addEventListener('DOMContentLoaded', () => {
     initSwipeGestures();
     initPullToRefresh();
 
+    const filtersPanel = document.getElementById('filters-panel');
+    const menuToggle = document.getElementById('menu-toggle');
     const fabFilters = document.getElementById('fab-filters');
-    if (fabFilters) {
-        fabFilters.addEventListener('click', () => {
-            const panel = document.getElementById('filters-panel');
-            if (panel) {
-                panel.classList.add('active');
-                panel.setAttribute('aria-modal', 'true');
-                trapFocus(panel);
-            }
+    const openFiltersPanel = () => {
+        if (!filtersPanel) return;
+        filtersPanel.classList.add('active');
+        filtersPanel.setAttribute('aria-modal', 'true');
+        menuToggle?.setAttribute('aria-expanded', 'true');
+        trapFocus(filtersPanel);
+    };
+    const closeFiltersPanel = () => {
+        if (!filtersPanel) return;
+        filtersPanel.classList.remove('active');
+        filtersPanel.setAttribute('aria-modal', 'false');
+        menuToggle?.setAttribute('aria-expanded', 'false');
+    };
+    if (fabFilters) fabFilters.addEventListener('click', openFiltersPanel);
+    if (menuToggle) {
+        menuToggle.addEventListener('click', () => {
+            if (filtersPanel?.classList.contains('active')) closeFiltersPanel();
+            else openFiltersPanel();
         });
     }
-
     const closePanel = document.getElementById('close-panel');
-    if (closePanel) {
-        closePanel.addEventListener('click', () => {
-            const panel = document.getElementById('filters-panel');
-            if (panel) {
-                panel.classList.remove('active');
-                panel.setAttribute('aria-modal', 'false');
-            }
+    if (closePanel) closePanel.addEventListener('click', closeFiltersPanel);
+
+    const mapResultsPanel = document.getElementById('map-results-panel');
+    const mapResultsCollapse = document.getElementById('map-results-collapse');
+    if (mapResultsPanel && mapResultsCollapse) {
+        mapResultsCollapse.addEventListener('click', () => {
+            const collapsed = mapResultsPanel.classList.toggle('is-collapsed');
+            document.body.classList.toggle('map-results-collapsed', collapsed);
+            mapResultsCollapse.setAttribute('aria-expanded', String(!collapsed));
+            mapResultsCollapse.setAttribute('aria-label', collapsed ? 'Expandir resultados' : 'Contraer resultados');
+            mapResultsCollapse.title = collapsed ? 'Expandir panel' : 'Contraer panel';
+            setTimeout(() => map && map.invalidateSize(), 260);
         });
     }
 
@@ -3594,7 +3695,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const searchInput = document.getElementById('search');
-    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (searchInput) {
+        searchInput.addEventListener('input', applyFilters);
+        searchInput.addEventListener('keydown', event => {
+            if (event.key === 'Enter') applyFiltersImmediate();
+        });
+    }
+    const clearSearch = document.getElementById('clear-search');
+    if (clearSearch) {
+        clearSearch.addEventListener('click', () => {
+            if (!searchInput) return;
+            searchInput.value = '';
+            applyFiltersImmediate();
+            searchInput.focus();
+        });
+    }
+    const searchSubmit = document.getElementById('search-submit');
+    if (searchSubmit) {
+        searchSubmit.addEventListener('click', () => {
+            applyFiltersImmediate();
+            searchInput?.focus();
+        });
+    }
 
     const filtroFecha = document.getElementById('filtro-fecha');
     if (filtroFecha) filtroFecha.addEventListener('change', applyFilters);

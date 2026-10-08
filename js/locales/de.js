@@ -8,7 +8,7 @@ export default {
         'btn.routes': 'Routen',
         
         'filters.title': '🔍 Filter',
-        'filters.search.placeholder': '🔍 Veranstaltungen, Orte suchen...',
+        'filters.search.placeholder': 'Veranstaltungen, Orte suchen...',
         'filters.search.aria': 'Veranstaltungen suchen',
         
         'filters.events': '🎭 Veranstaltungsfilter',

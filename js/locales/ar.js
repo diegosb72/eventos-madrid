@@ -8,7 +8,7 @@ export default {
         'btn.routes': 'مسارات',
         
         'filters.title': '🔍 فلاتر',
-        'filters.search.placeholder': '🔍 بحث عن فعاليات، أماكن...',
+        'filters.search.placeholder': 'بحث عن فعاليات، أماكن...',
         'filters.search.aria': 'بحث عن فعاليات',
         
         'filters.events': '🎭 فلاتر الفعاليات',

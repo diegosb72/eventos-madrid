@@ -8,7 +8,7 @@ export default {
         'btn.routes': 'Itinéraires',
         
         'filters.title': '🔍 Filtres',
-        'filters.search.placeholder': '🔍 Chercher événements, lieux...',
+        'filters.search.placeholder': 'Chercher événements, lieux...',
         'filters.search.aria': 'Chercher événements',
         
         'filters.events': '🎭 Filtres d\'événements',
